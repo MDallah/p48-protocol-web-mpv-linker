@@ -1,9 +1,12 @@
 import os
 import sys
 
-exe_path = sys.executable
-exe_dir = os.path.dirname(exe_path)
-script_file = os.path.join(exe_dir, 'P48')
+def is_compiled():
+    if hasattr(sys, "frozen") or '__compiled__' in globals():
+        return True  # Running as a standalone compiled binary (e.g., with PyInstaller or nuitka)
+    if __file__.endswith(('.pyc', '.pyo')):
+        return True  # Running as a compiled Python file
+    return False
 
 def detect_os():
     if sys.platform.startswith('win'):
@@ -111,13 +114,35 @@ MimeType=x-scheme-handler/p48;
         print(f"Failed to register protocol on Linux: {e}")
 
 if __name__ == "__main__":
+    if is_compiled():
+        exe_path = sys.executable
+        exe_dir = os.path.dirname(exe_path)
+        script_file = os.path.join(exe_dir, 'P48')
+    else:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        script_file = os.path.join(dir_path, 'P48')
+
     os_type = detect_os()
     if os_type == 'Windows':
-        if not protocol_exists_win():
+        if protocol_exists_win():
+            print("Protocol already exists. Skipping registration.")
+            print("Do you want to overwrite the existing protocol? ([Y]/n)")
+            choice = input().lower()
+            if choice in ['', 'yes', 'y']:
+                add_protocol_win()
+            else:
+                print("Exiting without changes.")
+        else:  
             add_protocol_win()
     elif os_type == 'Linux':
-        if not protocol_exists_linux():
-            add_protocol_linux()
+        if protocol_exists_linux():
+            print("Protocol already exists. Skipping registration.")
+            print("Do you want to overwrite the existing protocol? ([Y]/n)")
+            choice = input().lower()
+            if choice in ['', 'yes', 'y']:
+                add_protocol_linux()
+            else:
+                print("Exiting without changes.")
     elif os_type == 'macOS':
         print("macOS support is not implemented yet.")
     else:
