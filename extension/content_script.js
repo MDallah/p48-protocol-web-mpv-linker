@@ -42,13 +42,13 @@ function createP48Button(videoUrl) {
   link.href = p48Href;
   link.innerHTML = P48_ICON_SVG;
   link.style.display = "flex";
-  link.style.alignItems = "center";
-  link.style.justifyContent = "center";
-  link.style.width = "100%";
-  link.style.height = "100%";
-  link.style.color = "white";
-  link.style.opacity = "0.5";
-  link.style.marginTop = "10px";
+  // link.style.alignItems = "center";
+  // link.style.justifyContent = "center";
+  // link.style.width = "100%";
+  // link.style.height = "100%";
+  // link.style.color = "white";
+  link.style.opacity = "0.3";
+  link.style.marginTop = "-6px";
 
   iconContainer.appendChild(link);
   buttonContainer.appendChild(iconContainer);
@@ -77,9 +77,9 @@ const observer = new MutationObserver((mutationsList) => {
     if (mutation.type === "childList") {
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          const controlsContainer = node.matches("#avatar-container")
+          const controlsContainer = node.matches("#metadata-line")
             ? node
-            : node.querySelector("#avatar-container");
+            : node.querySelector("#metadata-line");
 
           if (
             controlsContainer &&
