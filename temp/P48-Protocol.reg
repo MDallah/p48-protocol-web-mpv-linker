@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\P48]
+@="URL:P48 Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\P48\shell]
+
+[HKEY_CLASSES_ROOT\P48\shell\open]
+
+[HKEY_CLASSES_ROOT\P48\shell\open\command]
+@="\"C:\\Users\\Dragon\\mpv-starter\\P48.exe\" \"%1\""
