@@ -1,0 +1,15 @@
+/* Add specific styles if needed, though inheriting YT classes is preferred */
+.ytInlinePlayerControlsTopRightControls .p48-linker-button {
+    /* border: 1px dashed cyan; */ /* Uncomment for debugging layout */
+}
+
+.ytInlinePlayerControlsTopRightControls .p48-linker-button a {
+    text-decoration: none; /* Remove underline from link */
+    cursor: pointer; /* Indicate it's clickable */
+}
+
+.ytInlinePlayerControlsTopRightControls .p48-linker-button svg {
+    /* Ensure icon size is correct */
+     width: 20px;
+     height: 20px;
+}

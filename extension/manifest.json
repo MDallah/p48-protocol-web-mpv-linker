@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "P48 Linker",
+  "version": "1.0",
+  "description": "Adds P48 protocol links to videos via inline buttons.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["*://*.youtube.com/*"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content_script.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

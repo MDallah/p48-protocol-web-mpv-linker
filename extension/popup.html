@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P48 Link Generator</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
+
+      :root {
+        --bg-color: #121212;
+        --card-bg: #1f1f1f;
+        --text-color: #f9f9f9;
+        --input-bg: #2a2a2a;
+        --input-border: #444;
+        --button-bg: #3a8fff;
+        --button-hover-bg: #2978d9;
+        --button-active-bg: #1e5ebc;
+        --link-bg: #273c51;
+        --link-hover-bg: #3b5371;
+        --error-color: #ff4c4c;
+        --border-radius: 10px;
+        --transition: 0.2s ease-in-out;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        padding: 30px 20px;
+        width: 360px;
+        font-size: 16px;
+      }
+
+      h3 {
+        font-size: 22px;
+        margin-bottom: 24px;
+        font-weight: 600;
+        text-align: center;
+        color: #ffffff;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: #cccccc;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 12px 14px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-color);
+        border-radius: var(--border-radius);
+        margin-bottom: 20px;
+        font-size: 15px;
+        transition: border-color var(--transition);
+      }
+
+      input[type="text"]:focus {
+        border-color: var(--button-bg);
+        outline: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        background-color: var(--button-bg);
+        color: #fff;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color var(--transition),
+          transform var(--transition);
+      }
+
+      button:hover {
+        background-color: var(--button-hover-bg);
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        background-color: var(--button-active-bg);
+        transform: scale(0.98);
+      }
+
+      #outputLinkContainer {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #2c2c2c;
+      }
+
+      #outputLinkContainer a {
+        display: block;
+        word-wrap: break-word;
+        background-color: var(--link-bg);
+        color: #a6d4ff;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: var(--border-radius);
+        margin-top: 10px;
+        transition: background-color var(--transition);
+      }
+
+      #outputLinkContainer a:hover {
+        background-color: var(--link-hover-bg);
+        text-decoration: underline;
+      }
+
+      #errorMessage {
+        color: var(--error-color);
+        margin-top: 14px;
+        font-weight: 600;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        text-align: center;
+        color: #888;
+      }
+
+      .footer a {
+        color: #58a6ff;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>P48 Proxy</h3>
+    <label for="videoUrlInput">Video URL:</label>
+    <input
+      type="text"
+      id="videoUrlInput"
+      placeholder="Paste URL here..."
+      autofocus
+    />
+    <button id="generateButton">Generate Link</button>
+    <div id="outputLinkContainer"></div>
+    <div id="errorMessage">Invalid URL. Please try again.</div>
+    <div class="footer">Not working? <a href="#">Get help</a></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
