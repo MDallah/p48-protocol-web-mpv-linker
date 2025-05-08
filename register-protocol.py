@@ -1,13 +1,6 @@
 import os
 import sys
 
-def is_compiled():
-    if hasattr(sys, "frozen") or '__compiled__' in globals():
-        return True  # Running as a standalone compiled binary (e.g., with PyInstaller or nuitka)
-    if __file__.endswith(('.pyc', '.pyo')):
-        return True  # Running as a compiled Python file
-    return False
-
 def detect_os():
     if sys.platform.startswith('win'):
         print("Detected OS: Windows")
@@ -83,15 +76,25 @@ def add_protocol_win():
         input("Press any key to exit...")
 
     except PermissionError:
-         print("Failed to register protocol handler: Permission denied.")
-         print("Please ensure you are running this script/executable as Administrator.")
-         input("Press any key to exit...")
+        print("Failed to register protocol handler: Permission denied.")
+        print("Please ensure you are running this script/executable as Administrator.")
+        input("Press any key to exit...")
     except Exception as e:
         print(f"Failed to register protocol handler: {e}")
         input("Press any key to exit...")
 
+def get_real_user_home():
+    from pathlib import Path
+    sudo_user = os.environ.get("SUDO_USER")
+    if sudo_user:
+        return Path(f"/home/{sudo_user}")
+    else:
+        return Path.home()
+
 def add_protocol_linux():
     try:
+        import subprocess
+
         desktop_entry = f"""[Desktop Entry]
 Name=P48 Protocol
 Exec={script_file} %u
@@ -99,7 +102,8 @@ Type=Application
 NoDisplay=true
 MimeType=x-scheme-handler/p48;
 """
-        applications_dir = os.path.expanduser("~/.local/share/applications")
+
+        applications_dir = get_real_user_home() / ".local/share/applications"
         os.makedirs(applications_dir, exist_ok=True)
 
         desktop_file_path = os.path.join(applications_dir, "p48-handler.desktop")
@@ -110,23 +114,25 @@ MimeType=x-scheme-handler/p48;
         os.system(f'xdg-mime default p48-handler.desktop x-scheme-handler/p48')
 
         print("Protocol handler registered successfully for Linux.")
+
+        try:
+            subprocess.run(["update-desktop-database", str(applications_dir)], check=True)
+            print("Desktop database updated successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error updating desktop database: {e}")
     except Exception as e:
         print(f"Failed to register protocol on Linux: {e}")
 
 if __name__ == "__main__":
-    if is_compiled():
-        exe_path = sys.executable
-        exe_dir = os.path.dirname(exe_path)
-        script_file = os.path.join(exe_dir, 'P48')
-    else:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        script_file = os.path.join(dir_path, 'P48')
-
     os_type = detect_os()
+    current_working_dir = os.getcwd()
+    print(f"Current Working Directory: {current_working_dir}")
+    
     if os_type == 'Windows':
+        script_file = os.path.join(current_working_dir, 'P48.exe')
         if protocol_exists_win():
-            print("Protocol already exists. Skipping registration.")
-            print("Do you want to overwrite the existing protocol? ([Y]/n)")
+            print("Protocol already exists.")
+            print("Do you want to overwrite the existing protocol? [Y/n]")
             choice = input().lower()
             if choice in ['', 'yes', 'y']:
                 add_protocol_win()
@@ -135,14 +141,17 @@ if __name__ == "__main__":
         else:  
             add_protocol_win()
     elif os_type == 'Linux':
+        script_file = os.path.join(current_working_dir, 'P48.bin')
         if protocol_exists_linux():
-            print("Protocol already exists. Skipping registration.")
-            print("Do you want to overwrite the existing protocol? ([Y]/n)")
+            print("Protocol already exists.")
+            print("Do you want to overwrite the existing protocol? [Y/n]")
             choice = input().lower()
             if choice in ['', 'yes', 'y']:
                 add_protocol_linux()
             else:
                 print("Exiting without changes.")
+        else:
+            add_protocol_linux()
     elif os_type == 'macOS':
         print("macOS support is not implemented yet.")
     else:
