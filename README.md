@@ -41,11 +41,11 @@ Welcome to **P48-Protocol (Web-MPV-Linker)** – a lightweight and super-easy wa
 
 - **Windows Requirements:**
 
-  - `protocol-registrer.exe` and `P48.exe` must be in the same directory.
+  - `protocol-registrer.exe` and `P48.exe` must be in the same directory. ([Download P48-WIN.zip](https://github.com/MDallah/p48-protocol-web-mpv-linker/releases))
 
 - **Linux Requirements:**
 
-  - `protocol-registrer.bin` and `P48.bin` must be in the same directory.
+  - `protocol-registrer.bin` and `P48.bin` must be in the same directory. ([Download P48-LINUX.zip](https://github.com/MDallah/p48-protocol-web-mpv-linker/releases))
 
 ## 🚀 Installation Guide
 
@@ -64,14 +64,14 @@ Make sure `mpv` is installed and working on your system.
 
 #### 🪟 Windows Setup
 
-1. Download the `P48.zip` file and extract it.
+1. Download the `P48-WIN.zip` file and extract it. ([Download](https://github.com/MDallah/p48-protocol-web-mpv-linker/releases))
 2. Right-click `protocol-registrer.exe` and choose **Run as Administrator**.
 3. Confirm the `p48://` protocol registration (overwrite if prompted).
 4. Ensure `P48.exe` is in the same folder as `protocol-registrer.exe`.
 
 #### 🐧 Linux Setup
 
-1. Download and extract the `P48.zip` file.
+1. Download and extract the `P48-LINUX.zip` file. ([Download](https://github.com/MDallah/p48-protocol-web-mpv-linker/releases))
 2. Run the command:
 
    ```bash
