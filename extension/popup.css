@@ -1,0 +1,350 @@
+/* --- START OF FILE popup.css --- */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"); /* Added 500 & 700 weights */
+
+:root {
+  /* --- Colors --- */
+  --bg-color: #1a1a1a; /* Slightly softer black */
+  --panel-bg: #202020; /* Background for the main panel */
+  --card-bg: #2a2a2a; /* Slightly lighter card bg */
+  --text-color: #e0e0e0; /* Slightly softer white */
+  --text-color-secondary: #a0a0a0; /* For labels, placeholders */
+  --text-color-headings: #ffffff; /* Brighter white for headings */
+  --input-bg: #2f2f2f;
+  --input-border: #4a4a4a;
+  --input-border-focus: var(--primary-color);
+  --input-shadow-focus: 0 0 0 2px rgba(58, 143, 255, 0.3); /* Softer focus ring */
+
+  /* Primary Accent */
+  --primary-color: #3a8fff; /* Vibrant Blue */
+  --primary-color-hover: #509dff;
+  --primary-color-active: #2978d9;
+
+  /* Buttons */
+  --button-text-color: #ffffff;
+  --button-gradient: linear-gradient(
+    180deg,
+    var(--primary-color-hover) 0%,
+    var(--primary-color) 100%
+  );
+  --button-gradient-hover: linear-gradient(
+    180deg,
+    #62aaff 0%,
+    var(--primary-color-hover) 100%
+  );
+  --button-gradient-active: linear-gradient(
+    180deg,
+    var(--primary-color) 0%,
+    var(--primary-color-active) 100%
+  );
+
+  /* Links (Output) */
+  --link-bg: #273c51;
+  --link-hover-bg: #3b5371;
+  --link-text-color: #a6d4ff;
+
+  /* Tabs */
+  --tab-inactive-bg: var(--panel-bg); /* Make inactive tabs blend more */
+  --tab-active-bg: var(--panel-bg); /* Active tab matches panel bg */
+  --tab-hover-bg: #333333;
+  --tab-border: #404040;
+  --tab-active-color: var(--primary-color);
+  --tab-inactive-color: var(--text-color-secondary);
+
+  /* Status */
+  --error-color: #ff5e5e;
+  --success-color: #50d070; /* Brighter green */
+
+  /* --- Layout & Effects --- */
+  --border-radius-outer: 12px; /* Larger radius for the main panel */
+  --border-radius-inner: 8px; /* Standard radius for elements inside */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-medium: 0.25s ease-in-out;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+  --shadow-inset-focus: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+*,
+*::before,
+*::after {
+  /* Apply box-sizing universally */
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-color); /* Use body background */
+  color: var(--text-color);
+  padding: 0;
+  width: 370px; /* Slightly wider */
+  font-size: 14px; /* Base font size */
+  line-height: 1.5; /* Improved readability */
+  overflow: hidden; /* Prevent scrollbars if content fits */
+}
+
+/* --- Main Panel & Tab Structure --- */
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Fill body */
+  /* background-color: var(--panel-bg); */
+  /* border-radius: var(--border-radius-outer); */
+  box-shadow: var(--shadow-lg);
+  overflow: hidden; /* Clip content to rounded corners */
+  margin: 8px; /* Add margin around the panel */
+  width: calc(100% - 16px); /* Adjust width for margin */
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid var(--tab-border);
+  /* background-color: var(--card-bg); Give tab bar a distinct background */
+}
+
+.tab-button {
+  flex: 1;
+  padding: 14px 10px; /* Slightly taller tabs */
+  background-color: var(--tab-inactive-bg);
+  color: var(--tab-inactive-color);
+  border: none;
+  border-bottom: 3px solid transparent; /* Thicker indicator space */
+  font-size: 14px;
+  font-weight: 600; /* Slightly bolder */
+  cursor: pointer;
+  transition: background-color var(--transition-medium),
+    color var(--transition-medium), border-color var(--transition-medium);
+  text-align: center;
+  position: relative; /* For potential pseudo-elements later */
+  /* Remove individual top radii, let .tab-panel handle it */
+}
+
+.tab-button:hover {
+  background-color: var(--tab-hover-bg);
+  color: var(--text-color);
+}
+
+.tab-button.active {
+  background-color: var(--tab-active-bg); /* Match panel */
+  color: var(--tab-active-color);
+  font-weight: 700; /* Bold active tab */
+  border-bottom-color: var(--tab-active-color);
+}
+
+/* Improved Focus State */
+.tab-button:focus-visible {
+  /* Modern focus selector */
+  outline: none;
+  box-shadow: var(--shadow-inset-focus), 0 0 0 2px var(--panel-bg),
+    0 0 0 4px var(--primary-color); /* More prominent focus ring */
+  z-index: 1; /* Ensure focus ring is on top */
+}
+
+.tab-contents {
+  padding: 25px 25px 20px 25px; /* Consistent padding */
+  flex-grow: 1;
+  overflow-y: auto; /* Allow scrolling if content overflows */
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease-in-out; /* Add fade-in */
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- General Element Styling --- */
+h3 {
+  font-size: 22px; /* Larger heading */
+  margin-bottom: 25px;
+  font-weight: 700; /* Bolder heading */
+  text-align: center;
+  color: var(--text-color-headings);
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+  font-size: 13px; /* Slightly smaller label */
+  text-transform: uppercase; /* Style */
+  letter-spacing: 0.5px;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px 14px; /* More padding */
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+  border-radius: var(--border-radius-inner);
+  margin-bottom: 20px; /* More space below inputs */
+  font-size: 14px;
+  transition: border-color var(--transition-medium),
+    box-shadow var(--transition-medium);
+}
+
+select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23a0a0a0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Use secondary color */
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px; /* Ensure space for arrow */
+}
+
+select option {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--input-border-focus);
+  outline: none;
+  box-shadow: var(--shadow-inset-focus), var(--input-shadow-focus); /* Combine inset and outer shadow */
+}
+
+/* --- Main Button Styling --- */
+button#generateButton {
+  width: 100%;
+  padding: 14px; /* Taller button */
+  background: var(--button-gradient); /* Use gradient */
+  color: var(--button-text-color);
+  border: none;
+  border-radius: var(--border-radius-inner);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-medium),
+    transform var(--transition-fast), box-shadow var(--transition-medium);
+  margin-top: 10px; /* Space above button */
+  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+button#generateButton:hover {
+  background: var(--button-gradient-hover);
+  transform: translateY(-2px); /* Slightly more lift */
+  box-shadow: var(--shadow-md);
+}
+
+button#generateButton:active {
+  background: var(--button-gradient-active);
+  transform: scale(0.98) translateY(-1px);
+  box-shadow: none; /* Remove shadow on press */
+}
+
+/* --- Output Link Styling --- */
+#outputLinkContainer {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid var(--tab-border);
+}
+
+#outputLinkContainer a {
+  display: block;
+  word-wrap: break-word;
+  background-color: var(--link-bg);
+  color: var(--link-text-color);
+  text-decoration: none;
+  padding: 12px 15px;
+  border-radius: var(--border-radius-inner);
+  margin-top: 10px;
+  transition: background-color var(--transition-medium),
+    box-shadow var(--transition-fast);
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-sm);
+}
+
+#outputLinkContainer a:hover {
+  background-color: var(--link-hover-bg);
+  text-decoration: underline;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* --- Status & Error Message Styling --- */
+#statusMessage,
+#errorMessage {
+  font-size: 13px;
+  min-height: 20px; /* Reserve space */
+  padding: 4px 8px; /* Add some padding */
+  border-radius: 4px; /* Subtle rounding */
+  margin-top: -15px; /* Pull up closer to select/input */
+  margin-bottom: 15px;
+  opacity: 0; /* Hidden by default, fade in */
+  transform: translateY(-3px);
+  transition: all var(--transition-medium), transform var(--transition-medium),
+    background-color var(--transition-medium);
+  font-weight: 500;
+}
+
+/* Show message when text is present */
+#statusMessage:not(:empty),
+#errorMessage:not(:empty) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Specific status styles */
+#statusMessage.success {
+  color: var(--success-color);
+  background-color: rgba(80, 208, 112, 0.1); /* Subtle background tint */
+}
+#statusMessage.error,
+#errorMessage:not(:empty) {
+  /* Style error message container directly */
+  color: var(--error-color);
+  background-color: rgba(255, 94, 94, 0.1); /* Subtle background tint */
+}
+
+/* Adjust error message spacing (remove negative margin if it has text) */
+#statusMessage:not(:empty),
+#errorMessage:not(:empty) {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+/* --- Footer Styling --- */
+.footer {
+  margin-top: 30px; /* More space before footer */
+  padding-top: 15px;
+  border-top: 1px solid var(--tab-border);
+  font-size: 12px; /* Smaller footer text */
+  text-align: center; /* Center align footer */
+  color: var(--text-color-secondary);
+}
+
+.footer a {
+  color: var(--primary-color-hover); /* Use lighter primary color for links */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-medium),
+    text-decoration var(--transition-medium);
+}
+
+.footer a:hover {
+  color: var(--text-color);
+  text-decoration: underline;
+}
+/* --- END OF FILE popup.css --- */

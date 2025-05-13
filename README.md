@@ -9,14 +9,14 @@ Welcome to **P48-Protocol (Web-MPV-Linker)** – a lightweight and super-easy wa
   - [🌟 Features](#-features)
   - [✅ Prerequisites](#-prerequisites)
   - [🚀 Installation Guide](#-installation-guide)
-    - [1. Install MPV](#1-install-mpv)
+    - [1. Install MPV & yt-dlp](#1-install-mpv--yt-dlp)
     - [2. Set Up the Browser Extension](#2-set-up-the-browser-extension)
     - [3. Configure the Protocol Handler](#3-configure-the-protocol-handler)
       - [🪟 Windows Setup](#-windows-setup)
       - [🐧 Linux Setup](#-linux-setup)
   - [📌 How to Use](#-how-to-use)
     - [Quick Start](#quick-start)
-    - [Manually Add Links (Popup)](#manually-add-links-popup)
+    - [Manually Add Links & Set Quality (Popup)](#manually-add-links--set-quality-popup)
   - [⚙️ Development Guide](#️-development-guide)
   - [🤝 Contributing](#-contributing)
   - [📜 License](#-license)
@@ -25,6 +25,7 @@ Welcome to **P48-Protocol (Web-MPV-Linker)** – a lightweight and super-easy wa
 
 - 🚀 **Instant Video Launch**: One-click playback of YouTube videos (including Shorts) in `mpv`.
 - 🔗 **Custom Protocol**: Defines a `P48://` URL scheme to launch videos directly in your external player (default: `mpv`).
+- ⚙️ **Quality Selection**: Choose your preferred video quality (e.g., 1080p, 720p, Best) via the extension popup. The handler will attempt to play at this quality or the best available lower one. This preference is saved and used by inline buttons too.
 - 🖱️ **Inline Buttons**: A small `🔻` button next to each YouTube video or Short for easy access.
 - 💡 **Cross-Platform Support**: Works seamlessly on both Windows and Linux.
 
@@ -34,6 +35,8 @@ Welcome to **P48-Protocol (Web-MPV-Linker)** – a lightweight and super-easy wa
 
   - [Get mpv here](https://mpv.io/installation/)
 
+- **`yt-dlp`**: **Highly recommended** for the quality selection feature to work effectively and for reliable playback of web videos. `mpv` often relies on `yt-dlp` (or the older `youtube-dl`) for web video playback. Ensure `yt-dlp` is installed and in your system PATH.
+  - [Get yt-dlp here](https://github.com/yt-dlp/yt-dlp)
 - **Compatible Browser**:
 
   - Firefox-based browsers (like Firefox, Zen).
@@ -49,13 +52,13 @@ Welcome to **P48-Protocol (Web-MPV-Linker)** – a lightweight and super-easy wa
 
 ## 🚀 Installation Guide
 
-### 1. Install MPV
+### 1. Install MPV & yt-dlp
 
-Make sure `mpv` is installed and working on your system.
+Make sure `mpv` and `yt-dlp` are installed and working on your system and are accessible via your system's PATH.
 
 ### 2. Set Up the Browser Extension
 
-1. Go to your browser’s Extensions page.
+1. Go to your browser’s Extensions page (e.g., `chrome://extensions` or `about:addons`).
 2. Enable **Developer Mode**.
 3. Click **Load Unpacked** and select the `extension/` directory.
 4. Make sure the extension is enabled and has the necessary permissions.
@@ -88,11 +91,11 @@ Make sure `mpv` is installed and working on your system.
 1. Open YouTube.
 2. Click the red `🔻` button next to any video or Short.
 
-   - the button will appear next to the view count of each video.
+   - The button will appear next to the view count of each video.
 
      <img src="./imgs/yt-btn-preview.png" alt="yt-btn-preview" width="400"/>
 
-3. The video will automatically open in `mpv`.
+3. The video will automatically open in `mpv`, attempting to use your saved quality preference.
 
 ### Manually Add Links (Popup)
 

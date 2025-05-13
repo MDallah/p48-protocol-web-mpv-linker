@@ -3,7 +3,7 @@
   "name": "P48 Linker",
   "version": "1.0",
   "description": "Adds P48 protocol links to videos via inline buttons.",
-  "permissions": ["scripting", "activeTab"],
+  "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": ["*://*.youtube.com/*"],
   "background": {
     "scripts": ["background.js"]
