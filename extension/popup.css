@@ -38,7 +38,10 @@
     var(--primary-color-active) 100%
   );
 
-  /* Links (Output) */
+  /* Added for disabled button state */
+  --button-disabled-bg: #404a59; /* Darker, desaturated blue/grey */
+  --button-disabled-text-color: #8c96a3;
+
   --link-bg: #273c51;
   --link-hover-bg: #3b5371;
   --link-text-color: #a6d4ff;
@@ -222,8 +225,13 @@ select:focus {
   box-shadow: var(--shadow-inset-focus), var(--input-shadow-focus); /* Combine inset and outer shadow */
 }
 
-/* --- Main Button Styling --- */
-button#generateButton {
+/* --- MODIFIED: Main Button Styling (now targets <a> tag) --- */
+a#generateLinkButton {
+  /* Changed selector from button#generateButton */
+  display: block; /* Make <a> behave like a block element */
+  text-align: center; /* Center text within the link */
+  text-decoration: none; /* Remove underline from link */
+
   width: 100%;
   padding: 14px; /* Taller button */
   background: var(--button-gradient); /* Use gradient */
@@ -241,16 +249,32 @@ button#generateButton {
   letter-spacing: 0.5px;
 }
 
-button#generateButton:hover {
+a#generateLinkButton:hover {
+  /* Changed selector */
   background: var(--button-gradient-hover);
-  transform: translateY(-2px); /* Slightly more lift */
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  color: var(--button-text-color); /* Ensure text color persists on hover */
 }
 
-button#generateButton:active {
+a#generateLinkButton:active {
+  /* Changed selector */
   background: var(--button-gradient-active);
   transform: scale(0.98) translateY(-1px);
-  box-shadow: none; /* Remove shadow on press */
+  box-shadow: none;
+}
+
+/* ADDED: Disabled state for the link-button */
+a#generateLinkButton.disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text-color);
+  cursor: not-allowed;
+  pointer-events: none; /* Prevents click events on the disabled link */
+  transform: none; /* Reset any transform from hover/active */
+  box-shadow: var(
+    --shadow-inset-focus
+  ); /* Optional: different shadow for disabled */
+  opacity: 0.7; /* Visually indicate disabled state */
 }
 
 /* --- Output Link Styling --- */

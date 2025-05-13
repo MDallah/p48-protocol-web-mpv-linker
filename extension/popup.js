@@ -5,38 +5,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Generator Tab Elements
   const urlInput = document.getElementById("videoUrlInput");
-  const generateButton = document.getElementById("generateButton");
-  const outputContainer = document.getElementById("outputLinkContainer");
+  const generateLinkButton = document.getElementById("generateLinkButton");
+  const outputContainer = document.getElementById("outputLinkContainer"); // Kept for potential future use or verbose display
   const errorContainer = document.getElementById("errorMessage");
 
   // Settings Tab Elements
   const qualitySelect = document.getElementById("qualitySelect");
   const statusMessageContainer = document.getElementById("statusMessage");
 
-  let statusTimeout; // To clear previous status messages
+  let settingsStatusTimeout; // Renamed to avoid conflict if another timeout is used elsewhere
 
   // --- Tab Switching Logic ---
   function activateTab(tabId) {
     tabContents.forEach((content) => {
       content.classList.remove("active");
-      // *** FIX: Use backticks for template literal or simple concatenation ***
       if (content.id === `${tabId}Content`) {
-        // Corrected line
-        // Alternatively: if (content.id === tabId + 'Content') {
         content.classList.add("active");
       }
-    }); // <-- Added missing closing parenthesis for forEach
-
+    });
     tabButtons.forEach((button) => {
       button.classList.remove("active");
       if (button.dataset.tab === tabId) {
         button.classList.add("active");
       }
     });
-
-    // Focus the main input when switching back to the generator tab
     if (tabId === "generator" && urlInput) {
-      // Use a slight delay to ensure the element is visible and focusable
       setTimeout(() => urlInput.focus(), 0);
     }
   }
@@ -47,19 +40,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // --- Status Message Logic ---
-  function showStatusMessage(message, type = "success", duration = 2500) {
-    clearTimeout(statusTimeout);
+  // --- Status Message Logic (for Settings tab) ---
+  function showSettingsStatusMessage(message, type = "success", duration = 2500) {
+    clearTimeout(settingsStatusTimeout);
     statusMessageContainer.textContent = message;
-    // Add the type class ('error' or 'success')
+    // Ensure CSS handles .status-message.success and .status-message.error
+    statusMessageContainer.className = 'status-message'; // Reset classes
     statusMessageContainer.classList.add(type);
-    // Ensure only one type class exists if called rapidly
-    if (type === "success") statusMessageContainer.classList.remove("error");
-    if (type === "error") statusMessageContainer.classList.remove("success");
 
-    statusTimeout = setTimeout(() => {
+
+    settingsStatusTimeout = setTimeout(() => {
       statusMessageContainer.textContent = "";
-      // Remove the type class when clearing
       statusMessageContainer.classList.remove("success", "error");
     }, duration);
   }
@@ -69,159 +60,157 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedQuality = qualitySelect.value;
     chrome.storage.local.set({ p48Quality: selectedQuality }, () => {
       if (chrome.runtime.lastError) {
-        console.error(
-          "P48 Linker Popup: Error saving quality:",
-          chrome.runtime.lastError.message
-        );
-        showStatusMessage("Error saving quality.", "error");
+        console.error("P48 Linker Popup: Error saving quality:", chrome.runtime.lastError.message);
+        showSettingsStatusMessage("Error saving quality.", "error");
       } else {
-        console.log(
-          "P48 Linker Popup: Quality preference auto-saved:",
-          selectedQuality
-        );
-        showStatusMessage("Quality preference saved!", "success");
+        showSettingsStatusMessage("Quality preference saved!", "success");
+        updateSubmitLinkHref(); // Update the generator link if quality changes
       }
     });
   }
 
-  // Load saved quality preference or set default
-  chrome.storage.local.get(["p48Quality"], (result) => {
-    if (result.p48Quality) {
-      qualitySelect.value = result.p48Quality;
-    } else {
-      qualitySelect.value = "best"; // Default to best
-      // Optionally save the default if it wasn't present
-      // saveQualityPreference();
-    }
-  });
-
-  // Save quality automatically when the selection changes
-  qualitySelect.addEventListener("change", saveQualityPreference);
-
-  // --- Generator Tab Logic ---
-  function generateAndOpenLink() {
+  // --- Generator Tab Logic: Update Submit Link Href ---
+  function updateSubmitLinkHref() {
     const rawUrl = urlInput.value.trim();
-    // Get the currently saved quality preference for generation
-    chrome.storage.local.get(["p48Quality"], (result) => {
-      const selectedQuality = result.p48Quality || "1080p"; // Use saved or default
+    
+    chrome.storage.local.get(["p48Quality"], (storageResult) => {
+      if (chrome.runtime.lastError) {
+        console.error("P48 Linker Popup: Error getting quality for link generation:", chrome.runtime.lastError.message);
+        errorContainer.textContent = "Error retrieving quality settings.";
+        generateLinkButton.href = "#";
+        generateLinkButton.classList.add("disabled");
+        return;
+      }
+      const selectedQuality = storageResult.p48Quality || "1080p"; // Default for generation
 
-      // Clear previous results in the Generator tab
-      outputContainer.innerHTML = "";
-      errorContainer.textContent = "";
+      // Clear previous generator-specific messages/outputs
+      if (outputContainer) outputContainer.innerHTML = ""; 
+      if (errorContainer) errorContainer.textContent = ""; 
 
       if (!rawUrl) {
-        errorContainer.textContent = "Please enter a Video URL.";
+        generateLinkButton.href = "#";
+        generateLinkButton.classList.add("disabled");
         return;
       }
 
-      try {
-        const url = new URL(rawUrl);
-        let videoId = null;
-        let cleanUrl = rawUrl;
+      let videoId = null;
+      let baseVideoUrl = rawUrl; 
+      let p48Href;
 
-        // --- YouTube URL Parsing (same as before) ---
-        if (url.hostname.includes("youtu")) {
-          if (url.hostname === "youtu.be") {
-            videoId = url.pathname.substring(1).split("?")[0];
-            if (videoId)
-              cleanUrl = `https://www.youtube.com/watch?v=${videoId}`;
-          } else if (url.hostname.includes("youtube.com")) {
-            if (url.pathname === "/watch") {
-              videoId = url.searchParams.get("v");
-              if (videoId)
-                cleanUrl = `${url.origin}${url.pathname}?v=${videoId}`;
-            } else if (url.pathname.startsWith("/shorts/")) {
-              videoId = url.pathname.split("/shorts/")[1].split("?")[0];
-              if (videoId)
-                cleanUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      try {
+        // Step 1: Validate and parse the initial input URL
+        const parsedRawUrl = new URL(rawUrl.startsWith('http://') || rawUrl.startsWith('https://') ? rawUrl : `https://${rawUrl}`);
+
+        // Step 2: Process for YouTube specifics to get a 'clean' base video URL
+        if (parsedRawUrl.hostname.includes("youtu")) { // Covers youtube.com, youtu.be
+          if (parsedRawUrl.hostname === "youtu.be") {
+            videoId = parsedRawUrl.pathname.substring(1).split(/[?#&]/)[0];
+            if (videoId) baseVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            else throw new Error("Invalid youtu.be URL (no ID found).");
+          } else if (parsedRawUrl.hostname.includes("youtube.com")) {
+            if (parsedRawUrl.pathname === "/watch") {
+              videoId = parsedRawUrl.searchParams.get("v");
+              if (videoId) baseVideoUrl = `https://www.youtube.com/watch?v=${videoId}`; // Strips other params
+              else throw new Error("Missing 'v' parameter in YouTube watch URL.");
+            } else if (parsedRawUrl.pathname.startsWith("/shorts/")) {
+              videoId = parsedRawUrl.pathname.split("/shorts/")[1].split(/[?#&]/)[0];
+              if (videoId) baseVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+              else throw new Error("Invalid YouTube Shorts URL (no ID found).");
+            } else {
+                 baseVideoUrl = parsedRawUrl.toString();
+                 if (!videoId && !baseVideoUrl.includes("/watch?v=") && !baseVideoUrl.includes("/playlist?list=")) {
+                     console.warn("P48 Linker: Potentially non-video/playlist YouTube URL being used as is: ", baseVideoUrl);
+                 }
             }
           }
-          // Stricter check: only proceed if videoId was found for youtube domains
-          if (!videoId && url.hostname.includes("youtu")) {
-            errorContainer.textContent =
-              "Invalid or unsupported YouTube URL format. Use watch?v=... or youtu.be/...";
-            return;
-          }
-        } else if (!(url.protocol === "http:" || url.protocol === "https:")) {
-          // Allow any http/https URL, reject others
-          errorContainer.textContent =
-            "Invalid or unsupported URL format (must be http/https).";
-          return;
-        }
-        // --- End YouTube URL Parsing ---
-
-        let urlForP48 = cleanUrl;
-        // Append quality parameter if not 'best'
-        if (selectedQuality && selectedQuality !== "best") {
-          const tempUrlObj = new URL(urlForP48);
-          // Ensure we don't add duplicate 'q' params, remove existing if present
-          if (tempUrlObj.searchParams.has("q")) {
-            tempUrlObj.searchParams.delete("q");
-          }
-          tempUrlObj.searchParams.set("q", selectedQuality);
-          urlForP48 = tempUrlObj.toString();
-        }
-
-        const p48Href = `p48://${urlForP48}`; // Ensure lowercase protocol
-
-        const linkElement = document.createElement("a");
-        linkElement.href = p48Href;
-        // Shorten displayed link if too long
-        const displayHref =
-          p48Href.length > 60 ? p48Href.substring(0, 57) + "..." : p48Href;
-        linkElement.textContent = `Click to open: ${displayHref}`;
-        linkElement.title = `Open in P48 Handler\nURL: ${urlForP48}\nQuality: ${selectedQuality}`;
-        outputContainer.appendChild(linkElement);
-
-        console.log("P48 Linker Popup: Attempting to open ", p48Href);
-
-        // Try opening the link
-        try {
-          // Using chrome.tabs.create is generally safer for protocol handlers
-          // from an extension popup than window.open
-          chrome.tabs.create({ url: p48Href, active: false }); // Opens in background
-          // Optionally close the popup after successful generation/opening
-          // setTimeout(() => window.close(), 200);
-        } catch (openError) {
-          console.error("P48 Linker Popup: Error opening P48 link:", openError);
-          errorContainer.textContent =
-            "Could not automatically open the P48 link. Please click the generated link manually.";
-          // Ensure the link is still visible for manual clicking
-          if (!outputContainer.contains(linkElement)) {
-            outputContainer.appendChild(linkElement);
-          }
-        }
-      } catch (e) {
-        console.error("P48 Linker Popup Error:", e);
-        if (
-          e instanceof TypeError &&
-          (e.message.includes("Invalid URL") ||
-            e.message.includes("Failed to construct 'URL'"))
-        ) {
-          errorContainer.textContent = "The entered text is not a valid URL.";
+        } else if (parsedRawUrl.protocol === "http:" || parsedRawUrl.protocol === "https:") {
+            baseVideoUrl = parsedRawUrl.toString(); // Use the normalized URL from new URL()
         } else {
-          errorContainer.textContent = "An error occurred processing the URL.";
+          throw new Error("URL must be HTTP or HTTPS.");
         }
+        
+        // Step 3: Create a new URL object from the (potentially cleaned) baseVideoUrl
+        let urlForP48Object = new URL(baseVideoUrl);
+
+        // Step 4: Add quality parameter if needed
+        if (selectedQuality && selectedQuality !== "best") {
+          urlForP48Object.searchParams.set("q", selectedQuality);
+        }
+        
+        // Step 5: Get the final string representation.
+        let finalUrlStringForP48 = urlForP48Object.toString();
+        
+        // Step 6: Construct the p48Href.
+        p48Href = `p48://${finalUrlStringForP48}`;
+
+        generateLinkButton.href = p48Href;
+        generateLinkButton.classList.remove("disabled");
+        if(errorContainer) errorContainer.textContent = ""; // Clear error on success
+
+      } catch (e) {
+        console.warn("P48 Linker Popup: Error parsing/constructing URL:", e.message, e);
+        let displayError = "Error processing URL.";
+        if (e instanceof TypeError && (e.message.includes("Invalid URL") || e.message.includes("Failed to construct 'URL'"))) {
+          displayError = "Invalid URL entered.";
+        } else if (e.message.includes("Invalid youtu.be URL") || e.message.includes("Missing 'v' parameter") || e.message.includes("Invalid YouTube Shorts URL") || e.message.includes("URL must be HTTP or HTTPS")) {
+          displayError = e.message; 
+        }
+        
+        if(errorContainer) errorContainer.textContent = displayError;
+        generateLinkButton.href = "#";
+        generateLinkButton.classList.add("disabled");
       }
-    }); // End chrome.storage.local.get callback
+    });
   }
 
-  // Add event listeners for the Generator tab
-  generateButton.addEventListener("click", generateAndOpenLink);
+  // --- Event Listeners ---
+
+  urlInput.addEventListener("input", updateSubmitLinkHref);
+  qualitySelect.addEventListener("change", saveQualityPreference); 
+
+  if (generateLinkButton) {
+    generateLinkButton.addEventListener("click", (event) => {
+      if (!generateLinkButton.classList.contains("disabled") && generateLinkButton.href.startsWith("p48://")) {
+        setTimeout(() => {
+          if (window && !window.closed) {
+            window.close();
+          }
+        }, 100); 
+      } else {
+        event.preventDefault();
+      }
+    });
+  }
 
   urlInput.addEventListener("keypress", (event) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // Prevent potential form submission
-      generateAndOpenLink();
+      event.preventDefault(); 
+      if (generateLinkButton && !generateLinkButton.classList.contains("disabled")) {
+        generateLinkButton.click(); 
+      }
     }
   });
 
-  // Select text on focus (optional, but user-friendly)
   urlInput.addEventListener("focus", () => {
-    // Use a timeout to ensure the focus event completes before selecting
-    setTimeout(() => urlInput.select(), 0);
+    setTimeout(() => {
+        if (typeof urlInput.select === 'function') {
+            urlInput.select();
+        }
+    }, 0);
   });
 
-  // Initialize the default tab state (Generator)
+  // --- Initialization ---
+  chrome.storage.local.get(["p48Quality"], (result) => {
+    if (chrome.runtime.lastError) {
+        console.warn("P48 Linker Popup: Error loading quality:", chrome.runtime.lastError.message);
+        qualitySelect.value = "best"; 
+    } else if (result.p48Quality) {
+      qualitySelect.value = result.p48Quality;
+    } else {
+      qualitySelect.value = "best"; 
+    }
+    updateSubmitLinkHref(); 
+  });
+
   activateTab("generator");
 });
