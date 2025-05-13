@@ -2,3 +2,5 @@ venv/
 
 *.log
 *.exe
+*.bin
+*.zip
