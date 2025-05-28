@@ -145,6 +145,7 @@ function createP48Button(videoUrl, config) {
   const link = document.createElement("a");
   link.classList.add(P48_LINK_CLASS);
   link.href = p48Href;
+  link.target = "_self";
   link.innerHTML = P48_ICON_SVG;
   link.style.display = "flex";
   link.style.opacity = "0.2";
